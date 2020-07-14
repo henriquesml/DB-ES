@@ -1,0 +1,1 @@
+SELECT ClienteNome, ClienteBairro FROM Clientes WHERE ClienteBairro IN ('BOM RETIRO', 'PROFIPO') AND ClienteNome NOT IN ('Ross') -- IN E NOT IN

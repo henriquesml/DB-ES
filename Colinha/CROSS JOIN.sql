@@ -1,0 +1,1 @@
+SELECT CartaoCredito.CartaoCodigo, Clientes.ClienteNome FROM CartaoCredito CROSS JOIN Clientes --Pra cada ocorrencia de uma tabela ele cruza com a outra
