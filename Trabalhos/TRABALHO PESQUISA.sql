@@ -1,5 +1,4 @@
 /*SCRIPT MYSQL*/
-
 CREATE DATABASE PesquisaUniville;
 USE PesquisaUniville;
 
@@ -15,6 +14,7 @@ CREATE TABLE pessoas
     id INT auto_increment, CONSTRAINT PRIMARY KEY (id),
     nome VARCHAR(40),
     idade INT,
+    sexo VARCHAR(1),
     cidade_id INT, CONSTRAINT FOREIGN KEY (cidade_id)
         REFERENCES cidades(id)
 );
@@ -57,7 +57,8 @@ CREATE TABLE respostas_perguntas
 
 INSERT cidades (nome, estado) VALUES ('joinville', 'SC');
 
-INSERT pessoas (nome, idade, cidade_id) VALUES ('Henrique Schmeller', 20, 1);
+INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Henrique Schmeller', 20, 'M', 1);
+INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Gabriela Schmeller', 20, 'F', 1);
 
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville');
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville 2');
@@ -82,6 +83,11 @@ INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, d
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 1, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 1, 'Sim', (SELECT CURDATE()));
 
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 2, 'Não', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 2, 'Sim', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 2, 'Não', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 2, 'Sim', (SELECT CURDATE()));
+
 USE PesquisaUniville;
 
 /*Quantidade de perguntas respondidas por pessoa*/
@@ -95,3 +101,9 @@ SELECT questionarios.titulo, count(perguntas.id) AS Total_de_respostas FROM perg
 iNNER JOIN perguntas_questionario ON perguntas_questionario.pergunta_id = perguntas.id
 iNNER JOIN questionarios ON questionarios.id = perguntas_questionario.questionario_id
 group by questionarios.titulo;
+
+/*Resposta das perguntas por pessoa*/
+SELECT pessoas.nome, perguntas.titulo, respostas_perguntas.resposta FROM perguntas
+iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
+iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
+group by pessoas.nome, perguntas.titulo, respostas_perguntas.resposta;
