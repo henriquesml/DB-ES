@@ -1,4 +1,5 @@
 /*SCRIPT MYSQL*/
+
 CREATE DATABASE PesquisaUniville;
 USE PesquisaUniville;
 
@@ -56,9 +57,12 @@ CREATE TABLE respostas_perguntas
 );
 
 INSERT cidades (nome, estado) VALUES ('joinville', 'SC');
+INSERT cidades (nome, estado) VALUES ('Curitiba', 'PR');
 
 INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Henrique Schmeller', 20, 'M', 1);
 INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Gabriela Schmeller', 20, 'F', 1);
+INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Jesus Apaga a Luz', 2020, 'M', 1);
+INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Desconhecido', 17, 'F', 2);
 
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville');
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville 2');
@@ -78,20 +82,34 @@ INSERT perguntas_questionario (questionario_id, pergunta_id) VALUES (2, 2);
 INSERT perguntas_questionario (questionario_id, pergunta_id) VALUES (2, 3);
 INSERT perguntas_questionario (questionario_id, pergunta_id) VALUES (2, 4);
 
+/*Respota Henrique*/
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 1, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 1, 'Não', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 1, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 1, 'Sim', (SELECT CURDATE()));
 
+/*Respota Gabriela*/
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 2, 'Não', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 2, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 2, 'Não', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 2, 'Sim', (SELECT CURDATE()));
 
+/*Respota Jesus Apaga a Luz*/
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 3, 'Meu pai criou Joinville', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 3, 'Meu pai criou o clima', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 3, 'Moro no céu com meu pai', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 3, 'Sim, no mundo todo', (SELECT CURDATE()));
+
+/*Respota Desconhecido*/
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 1, 4, 'Aham', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 2, 4, 'Maios ou menos', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 3, 4, 'Sim', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 4, 4, 'Não', (SELECT CURDATE()));
+
 USE PesquisaUniville;
 
 /*Quantidade de perguntas respondidas por pessoa*/
-SELECT pessoas.nome, count(resposta) AS Total_de_respostas FROM perguntas
+SELECT pessoas.nome, count(respostas_perguntas.resposta) AS Total_de_respostas FROM perguntas
 iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
 iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
 group by pessoas.nome;
@@ -103,7 +121,25 @@ iNNER JOIN questionarios ON questionarios.id = perguntas_questionario.questionar
 group by questionarios.titulo;
 
 /*Resposta das perguntas por pessoa*/
-SELECT pessoas.nome, perguntas.titulo, respostas_perguntas.resposta FROM perguntas
+SELECT perguntas.titulo, pessoas.nome, respostas_perguntas.resposta FROM perguntas
 iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
 iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
-group by pessoas.nome, perguntas.titulo, respostas_perguntas.resposta;
+group by perguntas.titulo, pessoas.nome, respostas_perguntas.resposta;
+
+/*Quantidade de resposta por sexo*/
+SELECT count(respostas_perguntas.resposta) as Total_de_resposta ,
+CASE 
+    WHEN pessoas.sexo = 'M' THEN 'Masculino'
+    ELSE 'Feminino'
+END AS 'Sexo'
+FROM perguntas
+iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
+iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
+group by pessoas.sexo;
+
+/*Quantidade de resposta por cidade*/
+SELECT cidades.nome, count(respostas_perguntas.resposta) as Total_de_resposta FROM perguntas
+iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
+iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
+iNNER JOIN cidades ON cidades.id = pessoas.cidade_id
+group by cidades.nome
