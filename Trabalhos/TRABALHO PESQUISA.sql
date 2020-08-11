@@ -3,11 +3,11 @@
 CREATE DATABASE PesquisaUniville;
 USE PesquisaUniville;
 
-CREATE TABLE cidades
+CREATE TABLE bairros
 (
     id INT auto_increment, CONSTRAINT PRIMARY KEY (id),
     nome VARCHAR(40),
-    estado VARCHAR(2)
+    zona VARCHAR(6)
 );
 
 CREATE TABLE pessoas
@@ -16,8 +16,8 @@ CREATE TABLE pessoas
     nome VARCHAR(40),
     idade INT,
     sexo VARCHAR(1),
-    cidade_id INT, CONSTRAINT FOREIGN KEY (cidade_id)
-        REFERENCES cidades(id)
+    bairro_id INT, CONSTRAINT FOREIGN KEY (bairro_id)
+        REFERENCES bairros(id)
 );
 
 CREATE TABLE questionarios
@@ -56,13 +56,13 @@ CREATE TABLE respostas_perguntas
         REFERENCES pessoas(id)
 );
 
-INSERT cidades (nome, estado) VALUES ('joinville', 'SC');
-INSERT cidades (nome, estado) VALUES ('Curitiba', 'PR');
+INSERT bairros (nome, zona) VALUES ('Profipo', 'SUL');
+INSERT bairros (nome, zona) VALUES ('Centro', 'CENTRO');
 
-INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Henrique Schmeller', 20, 'M', 1);
-INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Gabriela Schmeller', 20, 'F', 1);
-INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Jesus Apaga a Luz', 2020, 'M', 1);
-INSERT pessoas (nome, idade, sexo, cidade_id) VALUES ('Desconhecido', 17, 'F', 2);
+INSERT pessoas (nome, idade, sexo, bairro_id) VALUES ('Henrique Schmeller', 20, 'M', 1);
+INSERT pessoas (nome, idade, sexo, bairro_id) VALUES ('Gabriela Schmeller', 20, 'F', 1);
+INSERT pessoas (nome, idade, sexo, bairro_id) VALUES ('Jesus Apaga a Luz', 2020, 'M', 1);
+INSERT pessoas (nome, idade, sexo, bairro_id) VALUES ('Desconhecido', 17, 'F', 2);
 
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville');
 INSERT questionarios (titulo) VALUES ('Pergunas Sobre Joinville 2');
@@ -106,6 +106,8 @@ INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, d
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 3, 4, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 4, 4, 'Não', (SELECT CURDATE()));
 
+/* ------------------------------------------ CONSULTAS ------------------------------------------ */
+
 USE PesquisaUniville;
 
 /*Quantidade de perguntas respondidas por pessoa*/
@@ -137,9 +139,9 @@ iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
 iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
 group by pessoas.sexo;
 
-/*Quantidade de resposta por cidade*/
-SELECT cidades.nome, count(respostas_perguntas.resposta) as Total_de_resposta FROM perguntas
+/*Quantidade de resposta por bairro*/
+SELECT bairros.nome, bairros.zona, count(respostas_perguntas.resposta) as Total_de_resposta FROM perguntas
 iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
 iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
-iNNER JOIN cidades ON cidades.id = pessoas.cidade_id
-group by cidades.nome
+iNNER JOIN bairros ON bairros.id = pessoas.bairro_id
+group by bairros.nome, bairros.zona
