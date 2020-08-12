@@ -96,10 +96,10 @@ INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, d
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 2, 'Sim', (SELECT CURDATE()));
 
 /*Respota Jesus Apaga a Luz*/
-INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 3, 'Meu pai criou Joinville', (SELECT CURDATE()));
-INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 3, 'Meu pai criou o clima', (SELECT CURDATE()));
-INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 3, 'Moro no céu com meu pai', (SELECT CURDATE()));
-INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 3, 'Sim, no mundo todo', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 1, 3, 'sim', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 2, 3, 'sim', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 3, 3, 'sim', (SELECT CURDATE()));
+INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (1, 4, 3, 'sim', (SELECT CURDATE()));
 
 /*Respota Desconhecido*/
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 1, 4, 'Sim', (SELECT CURDATE()));
@@ -107,6 +107,7 @@ INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, d
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 3, 4, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 4, 4, 'Não', (SELECT CURDATE()));
 
+/*Respota Dornel*/
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 1, 5, 'Sim', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 2, 5, 'Não', (SELECT CURDATE()));
 INSERT respostas_perguntas (questionario_id, pergunta_id, pessoa_id, resposta, data_coleta) VALUES (2, 3, 5, 'Sim', (SELECT CURDATE()));
@@ -155,24 +156,47 @@ SELECT bairros.nome, bairros.zona, count(respostas_perguntas.resposta) as Total_
 iNNER JOIN respostas_perguntas ON respostas_perguntas.pergunta_id = perguntas.id
 iNNER JOIN pessoas ON pessoas.id = respostas_perguntas.pessoa_id
 iNNER JOIN bairros ON bairros.id = pessoas.bairro_id
-group by bairros.nome, bairros.zona
+group by bairros.nome, bairros.zona;
 
 /*Quantidade de pessoas que gostam de morar em joinville*/
+CREATE VIEW view_quantidade_gostam_de_morar_em_joinville_por_bairro AS
 SELECT bairros.nome AS Bairro, COUNT(respostas_perguntas.id) AS Quantidade FROM respostas_perguntas
-iNNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
-iNNER JOIN bairros on bairros.id = pessoas.bairro_id
-iNNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+INNER JOIN bairros on bairros.id = pessoas.bairro_id
+INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
 WHERE perguntas.id = 1 AND respostas_perguntas.resposta = "sim"
 GROUP BY bairros.nome
+ORDER BY bairros.nome;
 
-/*Quantidade de respostas para sim e não que gostam de morar em joinville*/
-SELECT bairros.nome AS Bairro, COUNT(respostas_perguntas.resposta = "sim") AS SIM, COUNT(respostas_perguntas.resposta = "não") AS NÃO, COUNT(respostas_perguntas.id) AS Quantidade FROM respostas_perguntas
-iNNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
-iNNER JOIN bairros on bairros.id = pessoas.bairro_id
-iNNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+/*Porcentagem de pessoas que gostam de morar em joinville*/
+CREATE VIEW view_porcentagem_de_resposta_morar_em_joinville AS
+SELECT respostas_perguntas.resposta, CONCAT(ROUND(CAST(COUNT(respostas_perguntas.id) AS FLOAT) /
+(
+	SELECT CAST(COUNT(respostas_perguntas.id) AS FLOAT) FROM respostas_perguntas
+	INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+	INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+	WHERE perguntas.id = 1
+) * 100, 2), " %") AS porcentagem FROM respostas_perguntas
+INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+WHERE perguntas.id = 1
+GROUP BY respostas_perguntas.resposta;
+
+/*Porcentagem de pessoas que gostam de morar em joinville por bairro */
+CREATE VIEW view_porcentagem_de_resposta_morar_em_joinville_por_bairro AS
+SELECT bairros.nome, respostas_perguntas.resposta, CONCAT(ROUND(CAST(COUNT(respostas_perguntas.id) AS FLOAT) /
+(
+	SELECT CAST(COUNT(respostas_perguntas.id) AS FLOAT) FROM respostas_perguntas
+	INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+	INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+	WHERE perguntas.id = 1
+) * 100, 2), " %") AS porcentagem FROM respostas_perguntas
+INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+INNER JOIN bairros on bairros.id = pessoas.bairro_id
+INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
 WHERE perguntas.id = 1
 GROUP BY bairros.nome, respostas_perguntas.resposta
-ORDER BY bairros.nome
+ORDER BY bairros.nome;
 
 /* ------------------------------------------ CONSULTA NAS VIEWS ------------------------------------------ */
 
@@ -181,3 +205,6 @@ SELECT * FROM view_quantidade_de_perguntas_por_questionario;
 SELECT * FROM view_repostas_das_perguntas_por_pessoa;
 SELECT * FROM view_quantidade_de_resposta_por_sexo;
 SELECT * FROM view_quantidade_de_resosta_por_bairro;
+SELECT * FROM view_quantidade_gostam_de_morar_em_joinville_por_bairro;
+SELECT * FROM view_porcentagem_de_resposta_morar_em_joinville;
+SELECT * FROm view_porcentagem_de_resposta_morar_em_joinville_por_bairro;
