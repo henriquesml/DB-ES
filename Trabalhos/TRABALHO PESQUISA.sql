@@ -182,6 +182,20 @@ INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
 WHERE perguntas.id = 1
 GROUP BY respostas_perguntas.resposta;
 
+/*Porcentagem de pessoas que gostam de morar em joinville por sexo*/
+CREATE VIEW view_porcentagem_gosta_de_morar_em_joinville_por_sexo AS
+SELECT pessoas.sexo, respostas_perguntas.resposta, CONCAT(ROUND(CAST(COUNT(respostas_perguntas.id) AS FLOAT) /
+(
+	SELECT CAST(COUNT(respostas_perguntas.id) AS FLOAT) FROM respostas_perguntas
+	INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+	INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+	WHERE perguntas.id = 1
+) * 100, 2), " %") AS porcentagem FROM respostas_perguntas
+INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+WHERE perguntas.id = 1
+GROUP BY pessoas.sexo, respostas_perguntas.resposta;
+
 /*Porcentagem de pessoas que gostam de morar em joinville por bairro */
 CREATE VIEW view_porcentagem_de_resposta_morar_em_joinville_por_bairro AS
 SELECT bairros.nome, respostas_perguntas.resposta, CONCAT(ROUND(CAST(COUNT(respostas_perguntas.id) AS FLOAT) /
@@ -198,6 +212,22 @@ WHERE perguntas.id = 1
 GROUP BY bairros.nome, respostas_perguntas.resposta
 ORDER BY bairros.nome;
 
+/*Porcentagem de pessoas que gostam de morar em joinville por sexo */
+CREATE VIEW view_porcentagem_de_resposta_morar_em_joinville_por_sexo AS
+SELECT pessoas.sexo, respostas_perguntas.resposta, CONCAT(ROUND(CAST(COUNT(respostas_perguntas.id) AS FLOAT) /
+(
+	SELECT CAST(COUNT(respostas_perguntas.id) AS FLOAT) FROM respostas_perguntas
+	INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+	INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+	WHERE perguntas.id = 1
+) * 100, 2), " %") AS porcentagem FROM respostas_perguntas
+INNER JOIN pessoas on pessoas.id = respostas_perguntas.pessoa_id
+INNER JOIN bairros on bairros.id = pessoas.bairro_id
+INNER JOIN perguntas on perguntas.id = respostas_perguntas.pergunta_id
+WHERE perguntas.id = 1
+GROUP BY pessoas.sexo, respostas_perguntas.resposta
+ORDER BY pessoas.sexo;
+
 /* ------------------------------------------ CONSULTA NAS VIEWS ------------------------------------------ */
 
 SELECT * FROM view_quantidade_de_respostas_por_pessoa;
@@ -206,5 +236,7 @@ SELECT * FROM view_repostas_das_perguntas_por_pessoa;
 SELECT * FROM view_quantidade_de_resposta_por_sexo;
 SELECT * FROM view_quantidade_de_resosta_por_bairro;
 SELECT * FROM view_quantidade_gostam_de_morar_em_joinville_por_bairro;
+SELECT * FROM view_porcentagem_gosta_de_morar_em_joinville_por_sexo;
 SELECT * FROM view_porcentagem_de_resposta_morar_em_joinville;
-SELECT * FROm view_porcentagem_de_resposta_morar_em_joinville_por_bairro;
+SELECT * FROM view_porcentagem_de_resposta_morar_em_joinville_por_bairro;
+SELECT * FROM view_porcentagem_de_resposta_morar_em_joinville_por_sexo;
