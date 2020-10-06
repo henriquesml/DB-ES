@@ -60,8 +60,7 @@ BEGIN
     BEGIN
 
         DECLARE @RESULTADO VARCHAR(50),
-                @FREQUENCIA FLOAT,
-                @MEDIAFINAL FLOAT;
+                @FREQUENCIA FLOAT;
 
         DECLARE @CARGAHORA INT 
         SET @CARGAHORA = (SELECT CARGAHORARIA from MATERIAS where sigla = @MATERIA and curso = @CURSO)
@@ -72,17 +71,23 @@ BEGIN
             TOTALPONTOS = @NOTA + N1 + N2 + N3,
             TOTALFALTAS = @FALTA + F1 + F2 + F3,
             MEDIA = (@NOTA + N1 + N2 + N3) / @BIMESTRE,
-            MEDIAFINAL = (@NOTA + N1 + N2 + N3) / @BIMESTRE,
-            PERCFREQ = 100 -( ((@FALTA + F1 + F2 + F3)* @CARGAHORA )/100)
+            PERCFREQ = 100 -( ((@FALTA + F1 + F2 + F3)* @CARGAHORA )/100),
+            RESULTADO = (
+            	case
+                  when ((@NOTA + N1 + N2 + N3) / @BIMESTRE >= 7) AND (100 -( ((@FALTA + F1 + F2 + F3)* @CARGAHORA )/100) >= 70) then 'Aprovado'
+                  when (100 -( ((@FALTA + F1 + F2 + F3)* @CARGAHORA )/100) < 70) then 'Reprovado'
+                  else 'Exame'
+                 end
+            )
                    WHERE MATRICULA = @MATRICULA
               AND CURSO = @CURSO
               AND MATERIA = @MATERIA
               AND PERLETIVO = @PERLETIVO;
-
-
     END;
 
     SELECT *
     FROM MATRICULA
     WHERE MATRICULA = @MATRICULA;
 END;
+
+
